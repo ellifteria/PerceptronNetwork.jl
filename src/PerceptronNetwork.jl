@@ -48,8 +48,8 @@ function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency
   weights = Vector{AbstractArray}(undef, layers)
   biases = Vector{AbstractArray}(undef, layers)
   for layer = 1:layers
-    weights[layer] = Matrix(randn(layer_shapes[layer][1], layer_shapes[layer][2]))
-    biases[layer] = Matrix(randn(layer_shapes[layer][1], 1))
+    weights[layer] = Matrix(rand(layer_shapes[layer][1], layer_shapes[layer][2]))
+    biases[layer] = Matrix(rand(layer_shapes[layer][1], 1))
   end
   a, z = feed_forward(inputs, weights, biases)
   weights, biases = propogate_back(y, a, z, weights, biases, eta)
@@ -87,8 +87,8 @@ biases = [b1, b2, b3]
 
 a, z = feed_forward(a0, weights, biases)
 
-n_weights, new_biases = propogate_back([0.8], a, z, weights, biases, 0.01)
+n_weights, n_biases = propogate_back([0.8], a, z, weights, biases, 0.01)
 
-a, z, n_weights, n_biases = train_network(a0, [0.8], [(2, 3), (2, 2), (1, 2)], 0.01, 1e4)
+a, z, n_weights, n_biases = train_network(a0, [0.8], [(2, 3), (2, 2), (1, 2)], 0.01, 1e5, 1e4)
 
 println("final output: $(a[end])\nfinal loss: $(loss(0.8, a[end]))")
