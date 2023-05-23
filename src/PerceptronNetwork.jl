@@ -75,15 +75,19 @@ function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency
     weights[layer] = rand(layer_shapes[layer][1], layer_shapes[layer][2])
     biases[layer] = rand(layer_shapes[layer][1],)
   end
-  z = Vector{Vector}(undef, layers)
-  a = Vector{Vector}(undef, layers + 1)
+  num_inputs = length(inputs)
+  A = Vector{Vector{Vector}}(undef, num_inputs)
+  Z = Vector{Vector{Vector}}(undef, num_inputs)
   for i = 1:iterations
-    num_inputs = length(inputs)
+    a = Vector{Vector}(undef, layers)
+    z = Vector{Vector}(undef, layers + 1)
     deltas = Vector{Vector{VecOrMat}}(undef, num_inputs)
     for j = 1:num_inputs
       a, z = feed_forward(inputs[j], weights, biases)
       deltas[j] = propogate_back(y[j], a, z, weights)
       # println(deltas[j])
+      A[j] = a
+      Z[j] = z
     end
     delta = mean(deltas)
     weights, biases = update_weights_and_biases(a, weights, biases, delta, eta)
@@ -91,7 +95,7 @@ function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency
     #   println("iteration $(i): error = $(sum_square_error(y, a[end]))")
     # end
   end
-  return a, z, weights, biases
+  return A, Z, weights, biases
 end
 
 end
@@ -117,6 +121,6 @@ weights = [W1, W2, W3]
 
 biases = [b1, b2, b3]
 
-a, z, W, B = train_network(a0, [0.8], [(2, 3), (2, 2), (1, 2)], 0.01, 1e2)
+A, Z, W, B = train_network([a0, a1], [[0.8], [0.7]], [(2, 3), (2, 2), (1, 2)], 0.01, 1e2)
 
 # println("final output: $(a[end])\nfinal loss: $(loss(0.8, a[end]))")
