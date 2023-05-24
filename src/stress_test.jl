@@ -5,20 +5,29 @@ using .PerceptronNetwork
 using .CSVReader
 
 feature_cols = [
-    "A",
-    "B"
+    "summary_compound",
+    "reviewText_compound",
+    "positive_pct",
+    "negative_pct",
+    "pct_pos_w_img",
+    "pct_neg_w_img",
+    "pct_pos_ver",
+    "pct_neg_ver",
+    "avg_pos_votes",
+    "avg_neg_votes",
+    "unixReviewTime"
 ]
 features = get_feature_vector(
-    "data/test_data.csv",
+    "data/product_training.csv",
     feature_cols
     )
 println("extracted training features: size=$(length(features)) x $(length(features[1]))")
 
 truth_cols = [
-    "C"
+    "awesomeness"
 ]
 truths = get_feature_vector(
-    "data/test_data.csv",
+    "data/product_training.csv",
     truth_cols
     )
 println("extracted training truths: size=$(length(truths)) x $(length(truths[1]))")
