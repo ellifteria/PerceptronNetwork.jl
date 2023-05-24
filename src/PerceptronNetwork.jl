@@ -2,7 +2,7 @@ module PerceptronNetwork
 
 using Statistics
 
-export relu, drelu, feed_forward, propogate_back, train_network, total_loss
+export relu, drelu, feed_forward, propogate_back, train_network, total_loss, calculate_accuracy, get_predictions
 
 function relu(x)
   return (x .> 0) .* x
@@ -59,6 +59,18 @@ function total_loss(Y, Y_hat)
   return cum_error
 end
 
+function get_predictions(Y_hat, cut_off = 0.5)
+  Y_hat_output = [y_hat[end] for y_hat in Y_hat]
+  return [y_hat_output .> cut_off for y_hat_output in Y_hat_output]
+end
+
+function calculate_accuracy(Y, Y_predictions)
+  matrix_Y = reduce(hcat, Y)
+  matrix_Y_predictions = reduce(hcat, Y_predictions)
+  correct_predictions = matrix_Y .== matrix_Y_predictions
+  return sum(correct_predictions) / length(correct_predictions)
+end
+
 function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency = 100)
   if !(inputs[1] isa VecOrMat)
     inputs = [inputs]
@@ -92,7 +104,7 @@ function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency
       print("initial ")
     end
     if i%print_frequency == 0 || i == 1
-      println("iteration $(i): error = $(total_loss(y, A))")
+      println("iteration $(i): error = $(total_loss(y, A)), accuracy = $(calculate_accuracy(y, get_predictions(A)))")
     end
   end
   return A, Z, weights, biases

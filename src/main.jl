@@ -5,8 +5,8 @@ using .PerceptronNetwork
 using .CSVReader
 
 feature_cols = [
-    "A",
-    "B"
+    "x1",
+    "x2"
 ]
 features = get_feature_vector(
     "data/test_data.csv",
@@ -15,7 +15,7 @@ features = get_feature_vector(
 println("extracted training features: size=$(length(features)) x $(length(features[1]))")
 
 truth_cols = [
-    "C"
+    "y"
 ]
 truths = get_feature_vector(
     "data/test_data.csv",
@@ -39,4 +39,6 @@ A, Z, W, B = train_network(
     )
 
 println("final error = $(total_loss(truths, A))")
+println("final accuracy = $(calculate_accuracy(truths, get_predictions(A)))")
+println("predictions:\n$(get_predictions(A))")
 

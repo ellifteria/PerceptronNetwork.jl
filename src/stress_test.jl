@@ -52,10 +52,11 @@ A, Z, W, B = train_network(
         (50, 50),
         (length(truth_cols), 50)
     ],
-    1e-75,
-    1e4,
+    1.965e-67,
+    1e3,
     1e1
     )
 
 println("final error = $(total_loss(truths, A))")
+println("final accuracy = $(calculate_accuracy(truths, get_predictions(A)))")
 
