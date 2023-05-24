@@ -26,8 +26,6 @@ end
 
 function propogate_back(y, a, z, weights)
   layers = length(weights)
-  # println(a[end])
-  # println(y)
   nablaC = a[end] .- y
   delta = Vector{VecOrMat}(undef, layers)
   delta[layers] = nablaC .* drelu(z[layers])
@@ -50,15 +48,6 @@ end
 
 function loss(y, y_hat)
   return (1/2) .* (y_hat .- y) .^ 2
-end
-
-function sum_square_error(Y, Y_hat)
-  println(Y)
-  println(Y_hat)
-  sum_errors = 0
-  for i = 1:length(Y)
-    sum_errors .+= loss(Y[i], Y_hat[i])
-  end
 end
 
 function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency = 100)
@@ -85,42 +74,17 @@ function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency
     for j = 1:num_inputs
       a, z = feed_forward(inputs[j], weights, biases)
       deltas[j] = propogate_back(y[j], a, z, weights)
-      # println(deltas[j])
       A[j] = a
       Z[j] = z
     end
     delta = mean(deltas)
     weights, biases = update_weights_and_biases(a, weights, biases, delta, eta)
-    # if i%print_frequency == 0
-    #   println("iteration $(i): error = $(sum_square_error(y, a[end]))")
-    # end
+    if i%print_frequency == 0
+      println("iteration $(i)")
+    end
   end
   return A, Z, weights, biases
 end
 
 end
 
-# using .PerceptronNetwork
-
-# W1 = [0.3 0.4 0; 0 0.1 0.5]
-
-# b1 = [0.2; 0.2]
-
-# W2 = [0.6 0.2; 0.3 0.3]
-
-# b2 = [0.1; 0.1]
-
-# W3 = [0.5 0.2]
-
-# b3 = [0.4]
-
-# a0 = [2.0; 1.0; 3.0]
-# a1 = [3.0; 2.0; 1.0]
-
-# weights = [W1, W2, W3]
-
-# biases = [b1, b2, b3]
-
-# A, Z, W, B = train_network([a0, a1], [[0.8], [0.7]], [(2, 3), (2, 2), (1, 2)], 0.01, 1e2)
-
-# # println("final output: $(a[end])\nfinal loss: $(loss(0.8, a[end]))")
