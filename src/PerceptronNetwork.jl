@@ -100,27 +100,27 @@ end
 
 end
 
-using .PerceptronNetwork
+# using .PerceptronNetwork
 
-W1 = [0.3 0.4 0; 0 0.1 0.5]
+# W1 = [0.3 0.4 0; 0 0.1 0.5]
 
-b1 = [0.2; 0.2]
+# b1 = [0.2; 0.2]
 
-W2 = [0.6 0.2; 0.3 0.3]
+# W2 = [0.6 0.2; 0.3 0.3]
 
-b2 = [0.1; 0.1]
+# b2 = [0.1; 0.1]
 
-W3 = [0.5 0.2]
+# W3 = [0.5 0.2]
 
-b3 = [0.4]
+# b3 = [0.4]
 
-a0 = [2.0; 1.0; 3.0]
-a1 = [3.0; 2.0; 1.0]
+# a0 = [2.0; 1.0; 3.0]
+# a1 = [3.0; 2.0; 1.0]
 
-weights = [W1, W2, W3]
+# weights = [W1, W2, W3]
 
-biases = [b1, b2, b3]
+# biases = [b1, b2, b3]
 
-A, Z, W, B = train_network([a0, a1], [[0.8], [0.7]], [(2, 3), (2, 2), (1, 2)], 0.01, 1e2)
+# A, Z, W, B = train_network([a0, a1], [[0.8], [0.7]], [(2, 3), (2, 2), (1, 2)], 0.01, 1e2)
 
-# println("final output: $(a[end])\nfinal loss: $(loss(0.8, a[end]))")
+# # println("final output: $(a[end])\nfinal loss: $(loss(0.8, a[end]))")
