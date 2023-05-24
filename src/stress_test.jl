@@ -36,15 +36,25 @@ A, Z, W, B = train_network(
     features,
     truths,
     [
-        (5, length(feature_cols)),
-        (5, 5),
-        (5, 5),
-        (5, 5),
-        (length(truth_cols), 5)
+        (50, length(feature_cols)),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (50, 50),
+        (length(truth_cols), 50)
     ],
-    1e-7,
+    1e-75,
     1e4,
-    1e2
+    1e1
     )
 
 println("final error = $(total_loss(truths, A))")
