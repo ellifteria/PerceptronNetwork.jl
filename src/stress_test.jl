@@ -15,7 +15,6 @@ feature_cols = [
     "pct_neg_ver",
     "avg_pos_votes",
     "avg_neg_votes"
-    # "unixReviewTime"
 ]
 training_data = get_feature_vector_tuples(
     "data/product_training.csv",
@@ -25,7 +24,6 @@ training_data = get_feature_vector_tuples(
    )
 println("extracted training data")
 
-# println(training_data)
 b, W = train_network(
     training_data,
     2,
@@ -36,8 +34,3 @@ b, W = train_network(
     0.01
 )
 
-predict(
-    [sample[1] for sample in training_data],
-    b,
-    W
-)

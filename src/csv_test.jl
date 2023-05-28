@@ -30,9 +30,3 @@ b, W = train_network(
 
 println("training complete")
 
-# predict(
-#     [sample[1] for sample in training_data],
-#     b,
-#     W
-# )
-
