@@ -1,114 +1,242 @@
 module PerceptronNetwork
 
-using Statistics
+using Random
 
-export relu, drelu, feed_forward, propogate_back, train_network, total_loss, calculate_accuracy, get_predictions
+export train_network, feed_forward, compute_accurary,
+    predict
+
+function quadratic_cost(z, a, Y)
+    return (a .- Y) .* dsigmoid(z)
+end
 
 function relu(x)
-  return (x .> 0) .* x
+    return (x .> 0) .* x
 end
 
 function drelu(x)
-  return (x .> 0)
+    return (x .> 0)
 end
 
-function feed_forward(inputs, weights, biases)
-  layers = length(weights)
-  z = Vector{Vector}(undef, layers)
-  a = Vector{Vector}(undef, layers + 1)
-  a[1] = inputs
-  for l = 1:layers
-    z[l] = vec(weights[l]*a[l] .+ biases[l])
-    a[l+1] = vec(relu(z[l]))
-  end
-    return a, z
+function sigmoid(x)
+    return 1 ./ (1 .+ exp.(-1 .* x))
 end
 
-function propogate_back(y, a, z, weights)
-  layers = length(weights)
-  nablaC = a[end] .- y
-  delta = Vector{VecOrMat}(undef, layers)
-  delta[layers] = nablaC .* drelu(z[layers])
-  for l = layers-1:-1:1
-    delta[l] = (transpose(weights[l+1]) * delta[l+1]) .* drelu(z[l])
-  end
-  return delta
+function dsigmoid(x)
+    return exp.(-1 .* x) ./ ((1 .+ exp.(-1 .* x)) .^ 2)
 end
 
-function update_weights_and_biases(a, weights, biases, delta, eta)
-  layers = length(weights)
-  new_biases = copy(biases)
-  new_weights = copy(weights)
-  for l = layers:-1:1
-    new_biases[l] = vec(biases[l] .- delta[l] .* eta)
-    new_weights[l] = weights[l] .- (delta[l] * transpose(a[l])) .* eta
-  end
-  return new_weights, new_biases
+function initialize_weights_biases(sizes)
+    biases = [randn(l_size, 1) for
+        l_size in sizes[2:end]]
+    weights = [randn(l_size1, l_size2) for
+        (l_size1, l_size2) in zip(sizes[2:end], sizes[1:end-1])]
+    return biases, weights
 end
 
-function loss(y, y_hat)
-  return (1/2) .* (y_hat .- y) .^ 2
-end
+function feed_forward(
+    X,
+    biases,
+    weights,
+    activation_function=sigmoid
+)
 
-function total_loss(Y, Y_hat)
-  num_inputs = length(Y_hat)
-  cum_error = 0
-  for i = 1:num_inputs
-    cum_error += sum(loss(Y[i], Y_hat[i][end]))
-  end
-  return cum_error
-end
+    a = copy(X)
+    as = Vector{VecOrMat}([a])
+    zs = Vector{VecOrMat}([])
 
-function get_predictions(Y_hat, cut_off = 0.5)
-  Y_hat_output = [y_hat[end] for y_hat in Y_hat]
-  return [y_hat_output .> cut_off for y_hat_output in Y_hat_output]
-end
+    for (b, w) in zip(biases, weights)
+        z = (w * a) + b
+        a = activation_function(z)
 
-function calculate_accuracy(Y, Y_predictions)
-  matrix_Y = reduce(hcat, Y)
-  matrix_Y_predictions = reduce(hcat, Y_predictions)
-  correct_predictions = matrix_Y .== matrix_Y_predictions
-  return sum(correct_predictions) / length(correct_predictions)
-end
-
-function train_network(inputs, y, layer_shapes, eta, iterations, print_frequency = 100)
-  if !(inputs[1] isa VecOrMat)
-    inputs = [inputs]
-  end
-  if !(y[1] isa VecOrMat)
-    y = [y]
-  end
-  layers = length(layer_shapes)
-  weights = Vector{Matrix}(undef, layers)
-  biases = Vector{Vector}(undef, layers)
-  for layer = 1:layers
-    weights[layer] = rand(layer_shapes[layer][1], layer_shapes[layer][2])
-    biases[layer] = rand(layer_shapes[layer][1],)
-  end
-  num_inputs = length(inputs)
-  A = Vector{Vector{Vector}}(undef, num_inputs)
-  Z = Vector{Vector{Vector}}(undef, num_inputs)
-  for i = 1:iterations
-    a = Vector{Vector}(undef, layers)
-    z = Vector{Vector}(undef, layers + 1)
-    deltas = Vector{Vector{VecOrMat}}(undef, num_inputs)
-    for j = 1:num_inputs
-      a, z = feed_forward(inputs[j], weights, biases)
-      deltas[j] = propogate_back(y[j], a, z, weights)
-      A[j] = a
-      Z[j] = z
+        push!(zs, z)
+        push!(as, a)
     end
-    delta = mean(deltas)
-    weights, biases = update_weights_and_biases(a, weights, biases, delta, eta)
-    if i == 1
-      print("initial ")
+    return a, as, zs
+end
+
+function propogate_back(
+    X,
+    Y,
+    biases,
+    weights,
+    activation_function=sigmoid,
+    cost_function=quadratic_cost,
+    dactivation_function=dsigmoid
+)
+
+    num_layers = length(biases)
+
+    nabla_b = [zeros(size(b)) for b in biases]
+    nabla_W = [zeros(size(W)) for W in weights]
+
+    _, as, zs = feed_forward(
+        X, biases, weights, activation_function
+    )
+
+    delta = cost_function(zs[end], as[end], Y)
+    nabla_b[end] = delta
+    nabla_W[end] = delta * as[end-1]'
+
+    for l = 2:num_layers
+        delta = (weights[end+2 - l]' * delta) .*
+            dactivation_function(zs[end+1 - l])
+        nabla_b[end+1 - l] = delta
+        nabla_W[end+1 - l] = delta * as[end - l]'
     end
-    if i%print_frequency == 0 || i == 1
-      println("iteration $(i): error = $(total_loss(y, A)), accuracy = $(calculate_accuracy(y, get_predictions(A)))")
+
+    return nabla_b, nabla_W
+end
+
+function update_network(
+    training_set,
+    biases,
+    weights,
+    eta,
+    activation_function=sigmoid,
+    cost_function=quadratic_cost,
+    dactivation_function=dsigmoid
+)
+
+    num_samples = length(training_set)
+
+    nabla_b = [zeros(size(b)) for b in biases]
+    nabla_W = [zeros(size(W)) for W in weights]
+
+    for (X, Y) in training_set
+        dnabla_b, dnabla_W = propogate_back(
+            X, Y, biases, weights, 
+            activation_function, cost_function,
+            dactivation_function)
+        nabla_b = [nab_b .+ dnab_b for
+            (nab_b, dnab_b) in zip(nabla_b, dnabla_b)]
+        nabla_W = [nab_W .+ dnab_W for
+            (nab_W, dnab_W) in zip(nabla_W, dnabla_W)]
     end
-  end
-  return A, Z, weights, biases
+
+    biases = [b .- (eta/num_samples) .* nab_b for
+        (b, nab_b) in zip(biases, nabla_b)]
+    weights = [W .- (eta/num_samples) .* nab_W for
+        (W, nab_W) in zip(weights, nabla_W)]
+    return biases, weights
+end
+
+function generate_predictions(Y_hat)
+    return [argmax(vec(y_hat)) for y_hat in Y_hat]
+end
+
+function compute_accurary(ground_truths, predictions)
+    return sum(ground_truths .== predictions)/length(predictions)
+end
+
+function vectorize_output(output, num_classes)
+    return 1:num_classes .== output
+end
+
+function vectorize_outputs(outputs, num_classes)
+    return [vectorize_output(output, num_classes) for output in outputs]
+end
+
+function vectorize_training_outputs(training_data, num_classes)
+    return [
+        (
+            row[1],
+            vectorize_output(row[2], num_classes)
+        )
+        for row in training_data
+    ]
+end
+
+function train_network(
+    training_data,
+    num_classes,
+    epochs,
+    print_frequency,
+    batch_size,
+    network_sizes,
+    eta,
+    activation_function=sigmoid,
+    cost_function=quadratic_cost,
+    dactivation_function=dsigmoid,
+    needs_vectorizing=true
+)
+    
+    num_samples = length(training_data)
+
+    biases, weights =
+        initialize_weights_biases(network_sizes)
+
+    X = [sample[1] for sample in training_data]
+    Y = [sample[2] for sample in training_data]
+
+    ground_truths = generate_predictions(
+        vectorize_outputs(Y, num_classes)
+    )
+
+    if needs_vectorizing
+        training_data = vectorize_training_outputs(
+            training_data,
+            num_classes
+        )
+    end
+
+    for epoch = 1:epochs
+        shuffled = shuffle(training_data)
+        batches = [shuffled[
+            start:start+batch_size] for
+            start = 1:batch_size:num_samples-batch_size]
+        for batch in batches
+            biases, weights = update_network(
+                batch,
+                biases,
+                weights,
+                eta,
+                activation_function,
+                cost_function,
+                dactivation_function
+            )
+        end
+        
+        if epoch % print_frequency == 0 ||
+            epoch == 1
+            println("Epoch $epoch complete")
+
+            network_predictions = predict(
+                X,
+                biases,
+                weights,
+                activation_function
+            )
+
+            println("Accuracy: $(
+                compute_accurary(
+                    ground_truths,
+                    network_predictions
+                )
+            )\n")
+        end
+    end
+
+    return biases, weights
+end
+
+function predict(
+    X,
+    biases,
+    weights,
+    activation_function=sigmoid
+)
+
+    raw_predictions = [
+        feed_forward(
+            x, biases, weights, activation_function
+        )[1] for x in X
+    ]
+
+    predictions = generate_predictions(
+        raw_predictions
+    )
+
+    return predictions
 end
 
 end
-

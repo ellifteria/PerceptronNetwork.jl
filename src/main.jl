@@ -2,43 +2,37 @@ include("PerceptronNetwork.jl")
 include("CSVReader.jl")
 
 using .PerceptronNetwork
-using .CSVReader
 
-feature_cols = [
-    "x1",
-    "x2"
+training_data = [
+    ([2,11],2),
+    ([9,12],2),
+    ([6,10],2),
+    ([5,8],2),
+    ([7,8],2),
+    ([3,9],1),
+    ([2,7],1),
+    ([1,2],1),
+    ([4,4],1),
+    ([6,2],1),
+    ([10,6],1),
+    ([11,3],2)
 ]
-features = get_feature_vector(
-    "data/test_data.csv",
-    feature_cols
-    )
-println("extracted training features: size=$(length(features)) x $(length(features[1]))")
 
-truth_cols = [
-    "y"
-]
-truths = get_feature_vector(
-    "data/test_data.csv",
-    truth_cols
-    )
-println("extracted training truths: size=$(length(truths)) x $(length(truths[1]))")
+b, W = train_network(
+    training_data,
+    2,
+    500,
+    100,
+    4,
+    [2, 50, 50, 2],
+    0.1
+)
 
-A, Z, W, B = train_network(
-    features,
-    truths,
-    [
-        (5, length(feature_cols)),
-        (5, 5),
-        (5, 5),
-        (5, 5),
-        (length(truth_cols), 5)
-    ],
-    1e-7,
-    1e4,
-    1e2
-    )
+println("training complete")
 
-println("final error = $(total_loss(truths, A))")
-println("final accuracy = $(calculate_accuracy(truths, get_predictions(A)))")
-println("predictions:\n$(get_predictions(A))")
+# predict(
+#     [sample[1] for sample in training_data],
+#     b,
+#     W
+# )
 

@@ -14,54 +14,30 @@ feature_cols = [
     "pct_pos_ver",
     "pct_neg_ver",
     "avg_pos_votes",
-    "avg_neg_votes",
-    "unixReviewTime"
+    "avg_neg_votes"
+    # "unixReviewTime"
 ]
-features = get_feature_vector(
+training_data = get_feature_vector_tuples(
     "data/product_training.csv",
-    feature_cols
-    )
-println("extracted training features: size=$(length(features)) x $(length(features[1]))")
+    feature_cols,
+    "awesomeness",
+    :
+   )
+println("extracted training data")
 
-truth_cols = [
-    "awesomeness"
-]
-truths = get_feature_vector(
-    "data/product_training.csv",
-    truth_cols
-    )
-println("extracted training truths: size=$(length(truths)) x $(length(truths[1]))")
+# println(training_data)
+b, W = train_network(
+    training_data,
+    2,
+    100,
+    1,
+    1,
+    [10, 50, 50, 2],
+    0.01
+)
 
-A, Z, W, B = train_network(
-    features,
-    truths,
-    [
-        (100, length(feature_cols)),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (100, 100),
-        (length(truth_cols), 100)
-    ],
-    1e-93,
-    1e3,
-    1e0
-    )
-
-println("final error = $(total_loss(truths, A))")
-println("final accuracy = $(calculate_accuracy(truths, get_predictions(A)))")
-
+predict(
+    [sample[1] for sample in training_data],
+    b,
+    W
+)
