@@ -54,7 +54,7 @@ function feed_forward(
     return a, as, zs
 end
 
-function propogate_back(
+function propagate_back(
     X,
     Y,
     biases,
@@ -103,7 +103,7 @@ function update_network(
     nabla_W = [zeros(size(W)) for W in weights]
 
     for (X, Y) in training_set
-        dnabla_b, dnabla_W = propogate_back(
+        dnabla_b, dnabla_W = propagate_back(
             X, Y, biases, weights, 
             activation_function, cost_function,
             dactivation_function)

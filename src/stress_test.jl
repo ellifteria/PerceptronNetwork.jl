@@ -27,8 +27,8 @@ println("extracted training data")
 b, W = train_network(
     training_data,
     2,
-    100,
-    1,
+    500,
+    10,
     1,
     [10, 50, 50, 2],
     0.01
