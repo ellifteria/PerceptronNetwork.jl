@@ -1,8 +1,8 @@
 include("PerceptronNetwork.jl")
-include("CSVReader.jl")
+include("DataIO.jl")
 
 using .PerceptronNetwork
-using .CSVReader
+using .DataIO
 
 feature_cols = [
     "summary_compound",
@@ -29,7 +29,7 @@ b, W = train_network(
     2,
     500,
     10,
-    1,
+    50,
     [10, 50, 50, 2],
     0.01
 )

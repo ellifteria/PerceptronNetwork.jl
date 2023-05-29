@@ -1,4 +1,4 @@
-module CSVReader
+module DataIO
 
 using DataFrames, CSV
 

@@ -1,8 +1,8 @@
 include("PerceptronNetwork.jl")
-include("CSVReader.jl")
+include("DataIO.jl")
 
 using .PerceptronNetwork
-using .CSVReader
+using .DataIO
 
 feature_cols = [
     "x1",
