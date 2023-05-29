@@ -1,8 +1,10 @@
 include("PerceptronNetwork.jl")
 include("DataIO.jl")
+include("NetworkIO.jl")
 
 using .PerceptronNetwork
 using .DataIO
+using .NetworkIO
 
 feature_cols = [
     "summary_compound",
@@ -17,12 +19,13 @@ feature_cols = [
     "avg_neg_votes"
 ]
 training_data = get_feature_vector_tuples(
-    "data/product_training.csv",
+    "data/input/product_training.csv",
     feature_cols,
     "awesomeness",
     :
-   )
-println("extracted training data")
+)
+
+println("extracted training data\ntraining model...\n")
 
 b, W = train_network(
     training_data,
@@ -34,3 +37,22 @@ b, W = train_network(
     0.01
 )
 
+println("training complete\n")
+
+write_network("data/output/product_nn.ser", b, W)
+
+println("serialized network\npredicting output...\n")
+
+predictions = predict(
+  [sample[1] for sample in training_data],
+  b,
+  W
+)
+
+println("predicting complete\n")
+
+prediction_df = read_id_column("data/input/product_training.csv", "asin")
+generate_prediction_df!(predictions, prediction_df, "awesomeness")
+save_predictions("data/output/product_nn_output.json", prediction_df)
+
+println("saved predictions")

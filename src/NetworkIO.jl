@@ -4,7 +4,7 @@ using Serialization
 
 export read_network, write_network
 
-function write_network(biases, weights, file_path)
+function write_network(file_path, biases, weights)
   data_to_write = [biases, weights]
   serialize(file_path, data_to_write)
 end

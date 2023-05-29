@@ -133,7 +133,8 @@ function vectorize_output(output, num_classes)
 end
 
 function vectorize_outputs(outputs, num_classes)
-    return [vectorize_output(output, num_classes) for output in outputs]
+    vectorized_output = [vectorize_output(output, num_classes) for output in outputs]
+    return vectorized_output
 end
 
 function vectorize_training_outputs(training_data, num_classes)
